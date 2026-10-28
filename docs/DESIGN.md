@@ -111,11 +111,25 @@ binding.
 
 ## 6. The network
 
-One pass and no decoder. A small CNN reads the five shots. Its last feature map is resized to the
-4 × 8 lattice, **one cell per Gaussian**, each cell sitting over where its Gaussian starts. Two
-transformer layers let the Gaussians see each other. Small MLPs, shared by all cells, turn each
-cell into its Gaussian. The result is 0.9M weights and 0.22 GFLOPs per model, 15 times less than
-InversionNet [3].
+One pass and no decoder:
+
+```
+shots [5,63,35] ─CNN─> 8×5 map ─resize─> 4×8 cells ─transformer─> 32 Gaussians + background ─render─> 70×70 model
+```
+
+- **Input.** Each example is divided by its own RMS and passed through `asinh`, so the absolute
+  amplitude of the survey does not matter.
+- **CNN.** Eight 3 × 3 convolution blocks (GroupNorm, LeakyReLU), three with stride 2, 32 to 128
+  channels.
+- **One cell per Gaussian.** The last map is resized to the 4 × 8 lattice. Cell k sits over where
+  Gaussian k starts: later times over deeper Gaussians, receiver columns over x.
+- **Mixing.** The 32 cells and one background token (their mean) pass two transformer layers, so
+  every Gaussian sees the others.
+- **Heads.** Two MLPs shared by all cells give each Gaussian its shape, as an offset from the
+  lattice, and its velocity; a third gives the background. All start at zero, so training starts
+  from the lattice at 3000 m/s.
+
+In total 0.9M weights and 0.22 GFLOPs per model, 15 times less than InversionNet [3].
 
 Each part was removed in turn, three seeds each:
 
