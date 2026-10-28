@@ -1,0 +1,10 @@
+# Data and results stay local.
+data_raw/*
+!data_raw/README.md
+data_processed/
+outputs/*
+!outputs/README.md
+
+.venv/
+__pycache__/
+.DS_Store

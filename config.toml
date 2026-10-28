@@ -1,0 +1,18 @@
+# GMNet: every command reads this file. Results go to outputs/<name>/.
+name = "0-10Hz"
+
+[data]
+raw = "data_raw"            # OpenFWI as downloaded
+processed = "data_processed"
+test = 0.10                 # share of each family's files
+validation = 0.05
+
+[train]
+band = [0, 10]              # Hz, inside 0-31; [4, 10] for the realism check
+epochs = 100
+batch_size = 64
+learning_rate = 1e-3
+seed = 0
+
+[predict]
+shots = "my_shots.npy"      # raw shots [N, 5, 1000, 70]
